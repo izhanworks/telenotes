@@ -1,0 +1,142 @@
+<?php      
+
+include('dbconnection.php');
+include('user_auth.php');   
+      
+        if ($chatId == $teleid){   
+
+	    $value = substr($message, 6);
+		$str = $value;
+			
+        $cost3 = (strpos($str,"@@"))+2;
+        $cost1 = (strpos($str,"#1"))+3;
+        $cost2 = (strpos($str,"#2"))+3;
+        $notes = substr($str,$cost2);
+        $notes = trim($notes);
+        $titlea = substr($str,$cost1);
+        $titlea = str_ireplace($notes,"",$titlea);
+        $titlea = trim($titlea);
+        $titlea = rtrim($titlea,"#2");
+        $title = trim($titlea);
+        $title = trim($title);
+		$dflag = substr($str,$cost3);
+		$dflag = trim($dflag);
+        $notes = str_ireplace($dflag,"",$notes);
+        $notes = str_ireplace("@@","",$notes);
+        $notes = trim($notes);
+              
+            if (!empty($dflag)) {
+        		$query=mysqli_query($con, "update tblpdfdata set title='$title',notes='$notes' where randomid='$dflag'");
+
+          
+    $ret=mysqli_query($con,"select * from tblpdfdata where randomid ='$dflag'");
+		
+		$cnt=1;
+		while ($row=mysqli_fetch_array($ret)) {
+		$title = $row['title'];
+		$notes = $row['notes'];
+		$randomid = $row['randomid'];
+		$cnt=$cnt+1;
+		}
+		
+		$resultdata = array(
+             'title'    =>     $title,
+             'notes'    =>     $notes,
+             'randomid'    =>     $randomid
+        );
+
+        $final_data = json_encode($resultdata, JSON_PRETTY_PRINT);
+        $dataresult =  json_decode($final_data,true);
+        $rtitle = $dataresult['title'];
+        $rnotes = $dataresult['notes'];
+        $rrandomid = $dataresult['randomid'];
+		
+			}
+			
+              else {
+              $replyMsg6 = "Invalid !!!\n=========================\nPlease use correct delete command !!!\n=========================";
+              $parameters6 = array(
+        	  "chat_id" => $chatId,
+        	  "text" => $replyMsg6,
+        	  "parseMode" => "html"
+    		  );
+    		 send("sendMessage", $parameters6);
+              }
+
+       		if ($value == NULL){
+       		$replyMsg6 = "Invalid! Please select title!\n=======================";
+       		$parameters6 = array(
+        	"chat_id" => $chatId,
+        	"text" => $replyMsg6,
+        	"parseMode" => "html"
+    		);
+    		send("sendMessage", $parameters6);
+       		exit;
+           	}
+       		else{
+       		if (!empty($dflag)) {  
+			
+			$retx=mysqli_query($con,"select * from tblpdfdata where randomid ='$dflag'");
+		
+		$cntx=1;
+		while ($row=mysqli_fetch_array($retx)) {
+		$randomidx = $row['randomid'];
+		$cntx=$cntx+1;
+		}
+			
+			if ($randomidx===NULL){
+	$replyMsg9 = "Invalid !!! SID = ".$dflag."\n=========================\nSID not exist in the database !!!\n=========================";
+              $parameters9 = array(
+        	  "chat_id" => $chatId,
+        	  "text" => $replyMsg9,
+        	  "parseMode" => "html"
+    		  );
+    		 send("sendMessage", $parameters9);
+	}
+	else{
+	$replyMsg6 ="Note Edit Successfully ! :\n=======================";
+            
+	}
+       		
+ }
+              else {
+              $replyMsg6 = "Incorrect Command Format ! :\n=======================";
+              }
+       		$parameters6 = array(
+        	"chat_id" => $chatId,
+        	"text" => $replyMsg6,
+        	"parseMode" => "html"
+    		);
+    		send("sendMessage", $parameters6);
+       		}
+			
+            $replyMsg6 = "
+General Notes List :  ".$rrandomid."
+=========================
+Title :  ".$rtitle."
+Notes : \n\n".$rnotes."
+========================="; 
+       	
+			$parameters6 = array(
+        	"chat_id" => $chatId,
+        	"text" => $replyMsg6,
+        	"parseMode" => "html"
+    		);
+    		send("sendMessage", $parameters6);
+			}
+         	else {
+            $replyMsg6 = "Unauthorized !!!\n=========================\nYou are not allowed to use this command !!!\n=========================";
+            $parameters6 = array(
+        	"chat_id" => $chatId,
+        	"text" => $replyMsg6,
+        	"parseMode" => "html"
+    		);
+    		send("sendMessage", $parameters6);
+			}
+			
+			
+			?>
+			
+			
+			
+			
