@@ -4,17 +4,18 @@ include('dbconnection.php');
 include('user_auth.php');   
       
         if ($chatId == $teleid){   
-	   
-		$getfilepath = json_decode(file_get_contents("https://api.telegram.org/bot".$token."/getfile?file_id=".$docfileid),true);
-		$getfilepath2 = $getfilepath["result"]["file_path"] ?? null ;
-		$resultflag = $getfilepath["ok"] ?? false ;  
-		if ($resultflag && $getfilepath2) {
-	    $randomid = secure_random_string(3);
-        $downlink = "https://api.telegram.org/file/bot".$token."/".$getfilepath2;  
-        $query=mysqli_query($con, "insert into tblstpic(file_id, unique_id, file_size, randomid) value('$docfileid', '$docfileuniqueid', '$docfilesize', '$randomid')");
-    	if ($query) {
-  
-        $ch = curl_init();
+
+$getfilepath = json_decode(file_get_contents("https://api.telegram.org/bot".$token."/getfile?file_id=".$docfileid),true);
+$getfilepath2 = $getfilepath["result"]["file_path"] ?? null ;
+$resultflag = $getfilepath["ok"] ?? false ;  
+
+if ($resultflag && $getfilepath2) {
+$randomid = secure_random_string(3);
+$downlink = "https://api.telegram.org/file/bot".$token."/".$getfilepath2;  
+$query=mysqli_query($con, "insert into tblstpic(file_id, unique_id, file_size, randomid) value('$docfileid', '$docfileuniqueid', '$docfilesize', '$randomid')");
+    	
+if ($query) {
+      $ch = curl_init();
     	$url = 'https://telegra.ph/upload';
         if ($docmime == "image/jpeg"){	
         file_put_contents('image.jpg', file_get_contents($downlink));
@@ -34,7 +35,7 @@ include('user_auth.php');
     	$src = $res[0]['src'] ?? null ;
         
     if ($src){
-        $replyMsg = "
+$replyMsg = "
 Image Detail : ".$randomid."
 ======================
 File ID : ".$docfileid."
@@ -49,18 +50,19 @@ Download Link : https://telegra.ph".$src."
         "disable_web_page_preview" => true,
         "parseMode" => "markdown"
     	);
-	send("sendMessage", $parameters);
+		send("sendMessage", $parameters);
 
 		   // Clean up the files
-                        if ($docmime === "image/jpeg") {
-                            unlink('image.jpg');
-                        } else if ($docmime === "image/png") {
-                            unlink('image.png');
-                        }
+      if ($docmime === "image/jpeg") {
+      unlink('image.jpg');
+      } else if ($docmime === "image/png") {
+      unlink('image.png');
+      }
     } 
 	}   
 	//end query
-	else{
+	
+else{
 	sendErrorMessage($chatId, "Failed to insert image data into the database.");
 	}
 	}
@@ -72,6 +74,5 @@ Download Link : https://telegra.ph".$src."
 else {
 			sendErrorMessage($chatId, "Unauthorized: You are not allowed to use this command.");			
       }    
-
 
 ?>
